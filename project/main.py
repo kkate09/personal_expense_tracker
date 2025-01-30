@@ -1,73 +1,70 @@
 from flask import Flask, request, redirect, render_template
 import os
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user
+from flask_login import LoginManager, UserMixin, login_user, logout_user
 
 app = Flask(__name__)
 
-#telling flask-sqlalchemy what database to connect to
+# Configure the database
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "falllback-secret-key")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "fallback-secret-key")
 
-db = SQLAlchemy()
+# Initialize the database
+db = SQLAlchemy(app)
 
+# Initialize Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-#creating user model & database
+# Creating user model
 class Users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(250), unique=True,
-                         nullable = False)
-    password = db.Column(db.string(250),
-                         nullable=False)
+    username = db.Column(db.String(250), unique=True, nullable=False)
+    password = db.Column(db.String(250), nullable=False)
 
-db.init_app(app)
+# Create database tables
 with app.app_context():
     db.create_all()
 
-#adding a user loader: a function that flask-login can use to retrieve a user object given a user id
-
+# Flask-Login user loader function
 @login_manager.user_loader
-def loader_user(user_id):
-    return Users.query.get(user_id)
+def load_user(user_id):
+    return Users.query.get(int(user_id))
 
-#functionality to register user of post request in made
-@app.route('/register', methods= ["GET","POST"])
+# User Registration Route
+@app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        user = Users(users=request.form.get("username"),
-                     password=request.form.get("password"))
+        user = Users(
+            username=request.form.get("username"),
+            password=request.form.get("password")
+        )
         db.session.add(user)
         db.session.commit()
-        return redirect("login.html")
+        return redirect("/login")  # Fixed redirection
     return render_template("sign_up.html")
 
-#functionality to login user
+# User Login Route
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    if request.methos== "POST":
-        user = Users.query.filter_by(
-            username=request.form.get("username")).first()
-        if user.password == request.form.get("password"):
+    if request.method == "POST":  # Fixed typo
+        user = Users.query.filter_by(username=request.form.get("username")).first()
+        if user and user.password == request.form.get("password"):  # Added user check
             login_user(user)
-            return render_template("login.html")
+            return redirect("/")  # Redirect to home after login
+    return render_template("login.html")
 
+# Home Page Route
+@app.route("/")
+def home():
+    return render_template("home.html")
 
+# Logout Route
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect("/")  # Fixed redirection
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    #credits: https://www.geeksforgeeks.org/how-to-add-authentication-to-your-app-with-flask-login/
-    #credits: chatgpt
+# Run Flask App
+if __name__ == "__main__":
+    app.run(debug=True)
