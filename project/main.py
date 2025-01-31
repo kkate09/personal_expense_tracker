@@ -41,23 +41,37 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        return redirect("/login")  # Fixed redirection
+        return redirect("/login")
     return render_template("sign_up.html")
 
 # User Login Route
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    if request.method == "POST":  # Fixed typo
+    if request.method == "POST":
         user = Users.query.filter_by(username=request.form.get("username")).first()
-        if user and user.password == request.form.get("password"):  # Added user check
+        if user and user.password == request.form.get("password"):
             login_user(user)
-            return redirect("/")  # Redirect to home after login
+            return redirect("/dashboard")
     return render_template("login.html")
+
+@app.route("/dashboard")
+def dashboard():
+    
+
+
+
+    return render_template("dashboard.html")
+
+
+
 
 # Home Page Route
 @app.route("/")
 def home():
     return render_template("home.html")
+
+
+
 
 # Logout Route
 @app.route("/logout")
