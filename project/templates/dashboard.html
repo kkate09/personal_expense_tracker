@@ -12,6 +12,21 @@
             margin-top: 50px;
         }
 
+         .theme-buttons {
+        background-color: #ccb3ff;
+        color: white;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .theme-buttons:hover {
+        background-color: #45a049;
+    }
+
         .home_container {
             background-color: white;
             width: 500px;
@@ -74,6 +89,38 @@
             text-decoration: none;
             font-size: 18px;
         }
+        /* Table Styling */
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #ccb3ff;
+    color: white;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+
     </style>
 </head>
 <body>
@@ -90,7 +137,44 @@
 
     <div class="home_container">
         <div class="banner_text">
-            <p>Blank Page</p>
+
+            {% if expenses|length == 0%}
+            <p>You have no expenses</p>
+            <button class="theme-buttons">
+            <a href="/add-expense">Add New Expense</a>
+        </button>
+            {% else %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+
+                </tr>
+            </thead>
+            <tbody>
+             <button class="theme-buttons">
+            <a href="/add-expense">Add New Expense</a>
+        </button>
+                {% for expense in expenses %}
+
+                <tr>
+                    <td>{{ expense.date }}</td>
+                    <td>{{ expense.description}}</td>
+                    <td>${{ expense.amount }}</td>
+                    <td>{{ expense.category_name }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+
+
+
         </div>
 
 
